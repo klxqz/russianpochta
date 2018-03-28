@@ -4,7 +4,7 @@ return array(
     'name' => 'Почта России',
     'description' => 'Взаимодействие c онлайн-сервисом «Отправка» Почты России',
     'vendor' => 985310,
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'img' => 'img/russianpochta.png',
     'shop_settings' => true,
     'frontend' => true,

@@ -315,6 +315,13 @@
                                             <option value="ONLINE_COURIER"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'ONLINE_COURIER'} selected="selected"{/if}>Курьер "онлайн"</option>
                                             <option value="EMS"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'EMS'} selected="selected"{/if}>Отправление EMS</option>
                                             <option value="EMS_OPTIMAL"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'EMS_OPTIMAL'} selected="selected"{/if}>EMS оптимальное</option>
+                                            <option value="EMS_RT"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'EMS_RT'} selected="selected"{/if}>EMS РТ</option>
+                                            <option value="LETTER"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'LETTER'} selected="selected"{/if}>Письмо</option>
+                                            <option value="BANDEROL"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'BANDEROL'} selected="selected"{/if}>Бандероль</option>
+                                            <option value="BUSINESS_COURIER"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'BUSINESS_COURIER'} selected="selected"{/if}>Бизнес курьер</option>
+                                            <option value="BUSINESS_COURIER_ES"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'BUSINESS_COURIER_ES'} selected="selected"{/if}>Бизнес курьер экпресс</option>
+                                            <option value="PARCEL_CLASS_1"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'PARCEL_CLASS_1'} selected="selected"{/if}>Посылка 1-го класса</option>
+                                            <option value="COMBINED"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'COMBINED'} selected="selected"{/if}>Комбинированное</option>
                                         </select>
                                     </div>
                                 </div>

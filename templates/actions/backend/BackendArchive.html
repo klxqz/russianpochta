@@ -1,0 +1,86 @@
+<h1>Архив</h1>
+{if !empty($error_msg)}
+    <p class="errormsg">
+        <i class="icon16 exclamation"></i>{$error_msg}
+    </p>
+{/if}
+<table class="table zebra">
+    <thead>
+        <tr>
+            <th class="nowrap">Номер партии</th>
+            <th>Дата сдачи</th>
+            <th>Количество заказов</th>
+            <th>Категория</th>
+            <th>Тип</th>
+            <th>Стоимость</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {foreach $batches as $batch}
+            <tr class="batch" data-batch-name="{$batch['batch-name']|escape}">
+                <td class="min-width">
+                    <a class="batch-orders-btn" href="#">
+                        {$batch['batch-name']}
+                    </a>
+                </td>
+                <td>
+                    <input disabled="disabled" type="text" class="batch-status-date" value="{date('d.m.Y', strtotime($batch['batch-status-date']))|escape}"
+                </td>
+                <td>
+                    {$batch['shipment-count']}
+                </td>
+                <td>
+                    {$batch['mail-category-text']}
+                </td>
+                <td>
+                    {$batch['mail-type-text']}
+                </td>
+                <td>
+                    {$total = $batch['shipment-mass-rate-sum'] + $batch['shipment-mass-rate-vat-sum'] + $batch['shipment-insure-rate-sum'] + $batch['shipment-insure-rate-vat-sum']}
+                    <div class="block">
+                        <ul class="menu-h dropdown">
+                            <li class="no-tab">
+                                <a class="s-more-link" href="javascript:void(0);">
+                                    {shop_currency_html($total / 100)}
+                                    <i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v" style="width: 250px;">
+                                    <li>
+                                        Сумма платы за пересылку c НДС 
+                                        <strong class="nowrap">{shop_currency_html(($batch['shipment-mass-rate-sum'] + $batch['shipment-mass-rate-vat-sum']) / 100.0, 'RUB', 'RUB')}</strong>
+                                    </li>
+                                    <li>
+                                        Сумма платы за объявленную ценность c НДС 
+                                        <strong class="nowrap">{shop_currency_html(($batch['shipment-insure-rate-sum'] + $batch['shipment-insure-rate-vat-sum']) / 100.0, 'RUB', 'RUB')}</strong>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td class="min-width">
+                    <div class="block">
+                        <ul class="menu-h dropdown">
+                            <li class="no-tab">
+                                <a class="s-more-link" href="javascript:void(0);">
+                                    <i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v" style="width: 200px;">
+                                    <li><a class="revert-batch-form-archive" href="#">Вернуть к сдаче</a></li>
+                                    <li><a href="?plugin=russianpochta&module=docs&action=createAll&batch_name={$batch['batch-name']}">Скачать документы</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        {foreachelse}
+            <tr>
+                <td colspan="6">
+                    Список партий пуст
+                </td>
+            </tr>
+        {/foreach}
+    </tbody>
+</table>

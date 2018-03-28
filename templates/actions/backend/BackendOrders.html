@@ -1,0 +1,109 @@
+<h1>Новые заказы</h1>
+{if !empty($error_msg)}
+    <p class="errormsg">
+        <i class="icon16 exclamation"></i>{$error_msg}
+    </p>
+{/if}
+<div class="fields form">
+    <form id="russianpochta-search-order-form" action="">
+        <div class="field">
+            <div class="name">Номер заказа</div>
+            <div class="value">
+                <input class="long" type="text" name="query" value="{$query|default:''|escape}"/>
+                <p class="hint">Номер заказа в интернет-магазине</p>
+            </div>
+        </div>
+        <div class="field">
+            <div class="value submit">
+                <input type="submit" class="button green" value="Найти">
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<table class="table zebra">
+    <thead>
+        <tr>
+            <th class="nowrap">Номер заказа</th>
+            <th>Получатель</th>
+            <th>Назначение</th>
+            <th>Стоимость</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {foreach $orders as $order}
+            <tr data-order-num="{$order['order-num']}" data-order-id="{$order['id']}">
+                <td class="min-width">
+                    <a class="russianpochta-open-dialog" href="#">
+                        {$order['order-num']}
+                    </a>
+                </td>
+                <td>
+                    <a class="russianpochta-open-dialog" href="#">
+                        {$order['surname']} {$order['given-name']}{if !empty($order['middle-name'])} {$order['middle-name']}{/if}
+                    </a>
+                </td>
+                <td>
+                    <a class="russianpochta-open-dialog" href="#">
+                        {$order['index-to']}, {$order['region-to']}, {$order['place-to']}
+                        {if !empty($order['street-to'])}, {$order['street-to']}{/if}
+                        {if !empty($order['house-to'])}, {$order['house-to']}{/if}
+                        {if !empty($order['room-to'])}, {$order['room-to']}{/if}
+                    </a>
+                </td>
+                <td>
+                    <div class="block">
+                        <ul class="menu-h dropdown">
+                            <li class="no-tab">
+                                <a class="s-more-link" href="javascript:void(0);">
+                                    {shop_currency_html(($order['mass-rate-with-vat'] + $order['insr-rate-with-vat']) / 100.0, 'RUB', 'RUB')}
+                                    <i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v" style="width: 250px;">
+                                    <li>
+                                        Почтовый сбор с НДС 
+                                        <strong class="nowrap">{shop_currency_html($order['mass-rate-with-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                    </li>
+                                    <li>
+                                        Страхование с НДС 
+                                        <strong class="nowrap">{shop_currency_html($order['insr-rate-with-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                    </li>
+                                    <li>
+                                        Итого сумма без НДС 
+                                        <strong class="nowrap">{shop_currency_html($order['total-rate-wo-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td class="min-width">
+                    <div class="block">
+                        <ul class="menu-h dropdown">
+                            <li class="no-tab">
+                                <a class="s-more-link" href="javascript:void(0);">
+                                    <i class="icon10 darr"></i>
+                                </a>
+                                <ul class="menu-v" style="width: 200px;">
+                                    <li><a class="сreate-batch" href="#">Подготовить к отправке</a></li>
+                                    <li><a class="move-order-to-batch-dialog" href="#">Перенести в партию</a></li>
+                                    <li><a class="delete-order" href="#">Удалить</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        {foreachelse}
+            <tr>
+                <td colspan="5">
+                    Заказов не найдено
+                </td>
+            </tr>
+        {/foreach}
+    </tbody>
+</table>
+<br/>
+<a  class="shop-orders-dialog-btn" href="#"><i class="icon16 add"></i>Добавить</a>

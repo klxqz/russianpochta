@@ -1,0 +1,35 @@
+<style>
+    #wa-app{
+        overflow: visible;
+    }
+    #russianpochta-content ul.menu-h.dropdown ul{
+        left: unset;
+        right: -3px;
+    }
+</style>
+<div class="sidebar left200px" id="russianpochta-sidebar">
+    <div class="">
+        <ul class="menu-v with-icons">
+            <li>
+                <a href="?plugin=russianpochta#/"><i class="icon16 new"></i>Новые заказы</a>
+            </li>
+            <li>
+                <a href="?plugin=russianpochta#/dispatch/"><i class="icon16 ss pt plane"></i>К сдаче</a>
+            </li>
+            <li>
+                <a href="?plugin=russianpochta#/archive/"><i class="icon16 archive"></i>Архив</a>
+            </li>
+        </ul>
+    </div> 
+</div>
+
+<div class="content left200px blank" id="russianpochta-content">
+    <div class="block triple-padded"><i class="icon16 loading"></i>[`Loading...`]</div>
+</div>
+<div style="display: none;" id="russianpochta-dialog"></div>
+<script type="text/javascript" src="{$wa_app_static_url}plugins/russianpochta/js/russianpochta.js?{$wa->version()}"></script>
+<script type="text/javascript">
+    $(function () {
+        $.russianpochta.init();
+    });
+</script>

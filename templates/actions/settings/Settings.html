@@ -1,0 +1,193 @@
+{$settings = $plugin->getSettings()}
+<style type="text/css">
+    .plugin-menu{
+        float: right;
+        list-style: none;
+    }
+    .plugin-menu li{
+        float: left;
+        margin-left: 10px;
+    }
+    .plugin-menu li a{
+        text-decoration: underline;
+    }
+    div.geshifilter {
+        background-color: #f8f8f8;
+        border: 1px solid #ccc;
+        color: #222;
+        display: block;
+        line-height: 1.3;
+        margin: 0.5em;
+        overflow: auto;
+        padding: 0.5em;
+    }
+</style>
+<h1>{$plugin->getName()}</h1>
+
+<ul class="plugin-menu">
+    <li><a target="_blank" href="http://support.wa-plugins.ru/">Поддержка разработчика плагина</a></li>
+</ul>
+
+<p>Перед началом работы с плагином зарегистрируйтесь в <a target="_blank" href="https://otpravka.pochta.ru">Почта России - Личный кабинет отправителя</a></p>
+
+<div class="fields form">
+    <form action="?module=plugins&id=russianpochta&action=save" method="post" id="plugins-settings-form">
+        {$wa->csrf()}
+
+        <div class="field-group">
+            <div class="field">
+                <div class="name">
+                    Статус плагина
+                </div>
+                <div class="value no-shift s-ibutton-checkbox">
+                    <input type="hidden" name="shop_russianpochta[status]" value="0">
+                    <input type="checkbox" id="ibutton-status" name="shop_russianpochta[status]" value="1"{if $settings.status} checked{/if}>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group"{if !$settings.status} style="display:none"{/if}>
+            <h3 class="grey">Авторизация</h3>
+            <p class="hint">Для работы плагина необходимы следующие данные для авторизации в сервисе Почта России:</p>
+            <div class="field">
+                <div class="name">
+                    Токен авторизации
+                </div>
+                <div class="value">
+                    <input class="long" type="text" name="shop_russianpochta[access_token]" value="{$settings.access_token|default:''|escape}">
+                    <p class="hint">Токен можно узнать в <a target="_blank" href="https://otpravka.pochta.ru/settings#/api-settings">настройках личного кабинета</a></p>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">
+                    Логин
+                </div>
+                <div class="value">
+                    <input class="long" type="text" name="shop_russianpochta[access_login]" value="{$settings.access_login|default:''|escape}">
+                    <p class="hint">Логин, выданный сервисом <a target="_blank" href="https://passport.pochta.ru">passport.pochta.ru</a></p>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">
+                    Пароль
+                </div>
+                <div class="value">
+                    <input class="long" type="password" name="shop_russianpochta[access_password]" value="{$settings.access_password|default:''|escape}">
+                    <p class="hint">Пароль, выданный сервисом <a target="_blank" href="https://passport.pochta.ru">passport.pochta.ru</a></p>
+                </div>
+            </div>
+            <div class="field">
+                <div class="value">
+                    <a class="connection-test-btn" href="#"><i class="icon16 ss pt globe"></i>Выполнить проверку соединения</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group"{if !$settings.status} style="display:none"{/if}>
+            <h3 class="grey">Отправитель</h3>
+            <div class="field">
+                <div class="name">Отправитель на посылке/название брэнда</div>
+                <div class="value">
+                    <input class="long" type="text" name="shop_russianpochta[brand-name]" value="{$settings['brand-name']|default:$user_settings['org-name']|escape}"/>
+                </div>
+            </div>
+            <div class="field">
+                <div class="name">
+                    Место приема
+                </div>
+                <div class="value">
+                    <select name="shop_russianpochta[postoffice-code]">
+                        <option value="">Выберите место приема</option>
+                        {foreach $shipping_points as $shipping_point}
+                            {if $shipping_point.enabled}
+                                <option value="{$shipping_point['operator-postcode']}"{if $shipping_point['operator-postcode'] == $settings['postoffice-code']|default:''} selected="selected"{/if}>{$shipping_point['ops-address']}</option>
+                            {/if}
+                        {/foreach}
+                    </select>
+                    <p class="hint">
+                        Если некорректно введены данные для авторизации плагин не сможет получить список мест приема.<br/>
+                        Список мест приема задается в <a target="_blank" href="https://otpravka.pochta.ru/settings#/service-settings">настройках сервиса Почта России</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group"{if !$settings.status} style="display:none"{/if}>
+            <h3 class="grey">Отладка</h3>
+            <div class="field">
+                <div class="name">
+                    Логирование
+                </div>
+                <div class="value">
+                    <input type="hidden" name="shop_russianpochta[logging]" value="0">
+                    <input type="checkbox" name="shop_russianpochta[logging]" value="1"{if $settings.logging|default:''} checked{/if}> - логировать запрос и коды ответов
+                </div>
+                <div class="value">
+                    <a target="_blank" href="{$wa_backend_url}logs/?action=file&path=russianpochta.log"><i class="icon16 script"></i> russianpochta.log</a>
+                    <p class="hint">Плагин ведет 
+                        <a target="_blank" href="https://ru.wikipedia.org/wiki/%D0%A4%D0%B0%D0%B9%D0%BB_%D1%80%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8">лог</a>
+                        обмена данными с сервисом Почта России.<br/>
+                        Для просмотра должно быть установлено приложение <a target="_blank" href="{$wa_backend_url}installer/#/apps/logs/">«Логи»</a><br/>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="field"{if !$settings.status} style="display:none"{/if}>
+            <div class="value submit">
+                <input type="submit" class="button green" value="Сохранить">
+                <span id="plugins-settings-form-status" style="display:none">
+                    <i style="vertical-align:middle" class="icon16 yes"></i> [`Saved`]
+                </span>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('#ibutton-status').iButton({
+            labelOn: "", labelOff: "", className: 'mini'
+        }).change(function () {
+            var self = $(this);
+            var enabled = self.is(':checked');
+            if (enabled) {
+                self.closest('.field-group').siblings().show(200);
+            } else {
+                self.closest('.field-group').siblings().hide(200);
+            }
+            var f = $("#plugins-settings-form");
+            $.post(f.attr('action'), f.serialize());
+        });
+        $('.connection-test-btn').click(function () {
+            var loading = $('<i class="icon16 loading"></i>');
+            $(this).after(loading);
+            var f = $("#plugins-settings-form");
+            $.post(f.attr('action'), f.serialize(), function () {
+                $.ajax({
+                    url: '?plugin=russianpochta&module=settings&action=connectionTest',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data, textStatus) {
+                        if (data.status == 'ok') {
+                            var yes_icon = $('<span class="green"><i class="icon16 yes"></i> Соединение успешно установлено</span>');
+                            loading.replaceWith(yes_icon);
+                            setTimeout(function () {
+                                yes_icon.remove();
+                            }, 3000);
+                        } else {
+                            loading.remove();
+                            alert(data.errors.join(', '));
+                        }
+                    }, error: function (jqXHR, textStatus, errorThrown) {
+                        loading.remove();
+                        alert(jqXHR.responseText);
+                    }
+                });
+            });
+
+            return false;
+        });
+    });
+</script>

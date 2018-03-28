@@ -1,0 +1,129 @@
+<style>
+    #russianpochta-form ul.menu-h.dropdown ul{
+        left: unset;
+        right: -3px;
+    }
+</style>
+<div class="dialog-background"></div>
+<form id="russianpochta-form" action="?plugin=russianpochta&module=order&action=moveToBatch">
+    <input type="hidden" name="order_id" value="{$order_id|default:0}"/>
+    {$wa->csrf()}
+    <div class="dialog-window">
+        <div class="dialog-content">
+            <div class="dialog-content-indent">
+                <h1>Добавление заказа в партию</h1>
+                {if !empty($error_msg)}
+                    <p class="errormsg">
+                        <i class="icon16 exclamation"></i>{$error_msg}
+                    </p>
+                {/if}
+                <table class="table zebra">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Номер партии</th>
+                            <th>Количество заказов</th>
+                            <th>Категория</th>
+                            <th>Тип</th>
+                            <th>Стоимость</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {$disabled_submit = true}
+                        {foreach $batches as $batch}
+                            {if $batch['batch-status'] != 'CREATED'}
+                                {continue}
+                            {/if}
+                            {$disabled_submit = false}
+                            <tr class="batch" data-batch-name="{$batch['batch-name']|escape}">
+                                <td>
+                                    <input type="radio" name="batch_name" value="{$batch['batch-name']|escape}" />
+                                </td>
+                                <td class="min-width">
+                                    {$batch['batch-name']}
+                                </td>
+                                <td>
+                                    {$batch['shipment-count']}
+                                </td>
+                                <td>
+                                    {$batch['mail-category-text']}
+                                </td>
+                                <td>
+                                    {$batch['mail-type-text']}
+                                </td>
+                                <td>
+                                    {$total = $batch['shipment-mass-rate-sum'] + $batch['shipment-mass-rate-vat-sum'] + $batch['shipment-insure-rate-sum'] + $batch['shipment-insure-rate-vat-sum']}
+                                    <div class="block">
+                                        <ul class="menu-h dropdown">
+                                            <li class="no-tab">
+                                                <a class="s-more-link" href="javascript:void(0);">
+                                                    {shop_currency_html($total / 100)}
+                                                    <i class="icon10 darr"></i>
+                                                </a>
+                                                <ul class="menu-v" style="width: 250px;">
+                                                    <li>
+                                                        Сумма платы за пересылку c НДС 
+                                                        <strong class="nowrap">{shop_currency_html(($batch['shipment-mass-rate-sum'] + $batch['shipment-mass-rate-vat-sum']) / 100.0, 'RUB', 'RUB')}</strong>
+                                                    </li>
+                                                    <li>
+                                                        Сумма платы за объявленную ценность c НДС 
+                                                        <strong class="nowrap">{shop_currency_html(($batch['shipment-insure-rate-sum'] + $batch['shipment-insure-rate-vat-sum']) / 100.0, 'RUB', 'RUB')}</strong>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        {foreachelse}
+                            <tr>
+                                <td colspan="6">
+                                    Не найдено подходящих партий
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="dialog-buttons">
+            <div class="dialog-buttons-gradient">
+                <input type="submit" value="Добавить" class="button green"{if $disabled_submit} disabled="disabled"{/if}>
+                <a class="cancel" href="#">Отмена</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#russianpochta-form').submit(function () {
+            var form = $(this);
+            var loading = $('<i class="icon16 loading"></i>');
+            form.find('input[type=submit]').after(loading);
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                dataType: 'json',
+                data: form.serialize(),
+                success: function (data, textStatus) {
+                    loading.remove();
+                    if (data.status == 'ok') {
+                        form.closest('.dialog').trigger('close');
+                        var order_id = form.find('[name=order_id]').val();
+                        $('#russianpochta-content tr[data-order-id=' + order_id + ']').remove();
+                    } else {
+                        alert(data.errors.join(', '));
+                    }
+                }, error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                }
+            });
+            return false;
+        });
+        $('#russianpochta-form .cancel').click(function () {
+            $(this).closest('.dialog').trigger('close');
+            return false;
+        });
+    });
+</script>

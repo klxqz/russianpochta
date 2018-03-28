@@ -1,0 +1,496 @@
+<div>
+    <style>
+        .form-error{
+            color: red;
+        }
+    </style>
+    {$batch = isset($russianpochta_order['batch-name'])}
+    <div class="dialog-background"></div>
+    <form id="russianpochta-form" action="?plugin=russianpochta&module=order&action=save">
+        <input type="hidden" name="batch_name" value="{$batch_name|default:''|escape}" />
+        <input type="hidden" name="order_id" value="{$order.id|default:0}"/>
+        <input type="hidden" name="russianpochta[id]" value="{$russianpochta_order['id']|default:''}"/>
+        {$wa->csrf()}
+        <div class="dialog-window">
+            <div class="dialog-content">
+                <div class="dialog-content-indent">
+                    {if $batch}
+                        <h1>{$russianpochta_order['barcode']}</h1>
+                    {else}
+                        <h1>Новое отправление Почта России</h1>
+                    {/if}
+
+                    {if !empty($error_msg)}
+                        <p class="errormsg">
+                            <i class="icon16 exclamation"></i>{$error_msg}
+                        </p>
+                    {else}
+
+                        <div class="fields form">
+                            {if !empty($russianpochta_order)}
+                                <div class="field">
+                                    <div class="name">Плата за пересылку</div>
+                                    <div class="value">
+
+                                        <ul class="menu-h dropdown">
+                                            <li class="no-tab">
+                                                <a class="s-more-link" href="javascript:void(0);">
+                                                    {shop_currency_html(($russianpochta_order['mass-rate-with-vat'] + $russianpochta_order['insr-rate-with-vat']) / 100.0, 'RUB', 'RUB')}
+                                                    <i class="icon10 darr"></i>
+                                                </a>
+                                                <ul class="menu-v" style="width: 250px;">
+                                                    <li>
+                                                        Почтовый сбор с НДС 
+                                                        <strong class="nowrap">{shop_currency_html($russianpochta_order['mass-rate-with-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                                    </li>
+                                                    <li>
+                                                        Страхование с НДС 
+                                                        <strong class="nowrap">{shop_currency_html($russianpochta_order['insr-rate-with-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                                    </li>
+                                                    <li>
+                                                        Итого сумма без НДС 
+                                                        <strong class="nowrap">{shop_currency_html($russianpochta_order['total-rate-wo-vat'] / 100.0, 'RUB', 'RUB')}</strong>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {/if}
+
+
+                            <h3 class="grey">
+                                Отправитель
+                                <a class="collapse-btn" href="#sender-fields"><i class="icon16 rarr overhanging"></i></a>
+                            </h3>
+                            <div id="sender-fields" class="field-group" style="display: none">
+                                <div class="field">
+                                    <div class="name">Отправитель на посылке/название брэнда</div>
+                                    <div class="value">
+                                        <input class="long" type="text" name="russianpochta[brand-name]" value="{$russianpochta_order['brand-name']|default:$settings['brand-name']|default:''|escape}"/>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Индекс места приема</div>
+                                    <div class="value">
+                                        <select name="russianpochta[postoffice-code]">
+                                            <option value="">Выберите место приема</option>
+                                            {foreach $shipping_points as $shipping_point}
+                                                {if $shipping_point.enabled}
+                                                    <option value="{$shipping_point['operator-postcode']}"{if $shipping_point['operator-postcode'] == $russianpochta_order['postoffice-code']|default:$settings['postoffice-code']|default:''} selected="selected"{/if}>{$shipping_point['ops-address']}</option>
+                                                {/if}
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </div> 
+                            </div>
+
+
+                            <h3 class="grey">
+                                Получатель
+                                <a class="collapse-btn" href="#recipient-fields"><i class="icon16 darr overhanging"></i></a>
+                            </h3>
+                            <div id="recipient-fields" class="field-group">
+                                <p class="hint">Контактные данные получателя</p>
+                                <div class="field">
+                                    <div class="name">Фамилия *</div>
+                                    <div class="value">
+                                        <input class="required" type="text" name="russianpochta[surname]" value="{$russianpochta_order.surname|default:$contact.lastname|escape}"/>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="name">Имя *</div>
+                                    <div class="value">
+                                        <input class="required" type="text" name="russianpochta[given-name]" value="{$russianpochta_order['given-name']|default:$contact.firstname|escape}"/>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="name">Отчество</div>
+                                    <div class="value">
+                                        <input type="text" name="russianpochta[middle-name]" value="{$russianpochta_order['middle-name']|default:$contact.middlename|escape}"/>
+                                    </div>
+                                </div> 
+                                <div class="field">
+                                    <div class="name">Телефон *</div>
+                                    <div class="value">
+                                        <input type="text" name="russianpochta[tel-address]" value="{$russianpochta_order['tel-address']|default:$order.contact.phone|escape}"/>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <h3 class="grey">
+                                Адрес
+                                <a class="collapse-btn" href="#address-fields"><i class="icon16 darr overhanging"></i></a>
+                            </h3>           
+                            <div id="address-fields" class="field-group">
+                                <div class="field">
+                                    <div class="name">Тип адреса *</div>
+                                    <div class="value">
+                                        <select name="russianpochta[address-type-to]">
+                                            <option value="DEFAULT"{if $russianpochta_order['address-type-to']|default:'DEFAULT' == 'DEFAULT'} selected="selected"{/if}>Стандартный (улица, дом, квартира)</option>
+                                            <option value="PO_BOX"{if $russianpochta_order['address-type-to']|default:'DEFAULT' == 'PO_BOX'} selected="selected"{/if}>Абонентский ящик</option>
+                                            <option value="DEMAND"{if $russianpochta_order['address-type-to']|default:'DEFAULT' == 'DEMAND'} selected="selected"{/if}>До востребования</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Почтовый индекс</div>
+                                    <div class="value">
+                                        <input name="russianpochta[index-to]" value="{$russianpochta_order['index-to']|default:$order.params['shipping_address.zip']|default:''|escape}"/>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Страна *</div>
+                                    <div class="value">
+                                        <select name="russianpochta[mail-direct]">
+                                            {foreach $countries as $country}
+                                                <option value="{$country.isonumeric}"{if $russianpochta_order['mail-direct']|default:$order.params['shipping_address.country_code']|default:'' == $country.isonumeric} selected="selected"{/if}>{$country.name}</option>
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </div> 
+
+                                <div class="field">
+                                    <div class="name">Область, регион *</div>
+                                    <div class="value">
+                                        {if !empty($regions)}
+                                            <select name="russianpochta[region-to]">
+                                                {foreach $regions as $region}
+                                                    <option value="{$region.name}"{if $region.name == $russianpochta_order['region-to']|default:$order.params['shipping_address.region_name']|default:''} selected="selected"{/if}>{$region.name}</option>
+                                                {/foreach}
+                                            </select>
+                                        {else}
+                                            <input class="required long" type="text" name="russianpochta[region-to]" value="{$russianpochta_order['region-to']|default:$order.params['shipping_address.region_name']|default:''|escape}"/>
+                                        {/if}
+
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Населенный пункт *</div>
+                                    <div class="value">
+                                        <input class="required long" type="text" name="russianpochta[place-to]" value="{$russianpochta_order['place-to']|default:$order.params['shipping_address.city']|default:''|escape}"/>
+                                    </div>
+                                </div> 
+                                <div class="field">
+                                    <div class="name">Улица *</div>
+                                    <div class="value">
+                                        <input class="required long" type="text" name="russianpochta[street-to]" value="{$russianpochta_order['street-to']|default:$order.params['shipping_address.street']|default:''|escape}"/>
+                                    </div>
+                                </div> 
+                                <div class="field">
+                                    <div class="name">Номер здания</div>
+                                    <div class="value">
+                                        <input class="short" type="text" name="russianpochta[house-to]" value="{$russianpochta_order['house-to']|default:''|escape}"/>
+                                    </div>
+                                </div>  
+                                <div class="field">
+                                    <div class="name">Номер помещения</div>
+                                    <div class="value">
+                                        <input type="text" class="short" name="russianpochta[room-to]" value="{$russianpochta_order['room-to']|default:''|escape}"/>
+                                    </div>
+                                </div> 
+                                <div class="clear-both"></div>
+
+                                <a id="extended-address-fields-btn" href="#">Дополнительные поле адреса</a>
+
+                                <div id="extended-address-fields" class="field-group" style="display: none;">
+                                    <div class="field">
+                                        <div class="name">Район</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[area-to]" value="{$russianpochta_order['area-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="name">Микрорайон</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[location-to]" value="{$russianpochta_order['location-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <div class="name">Строение</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[building-to]" value="{$russianpochta_order['building-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="name">Корпус</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[corpus-to]" value="{$russianpochta_order['corpus-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="name">Литера</div>
+                                        <div class="value">
+                                            <input class="short" type="text" name="russianpochta[letter-to]" value="{$russianpochta_order['letter-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="name">Дробь</div>
+                                        <div class="value">
+                                            <input type="text" class="short" name="russianpochta[slash-to]" value="{$russianpochta_order['slash-to']|default:''|escape}"/>
+                                        </div>
+                                    </div> 
+                                    <div class="field">
+                                        <div class="name">Название гостиницы</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[hotel-to]" value="{$russianpochta_order['hotel-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="name">Номер для а/я, войсковая часть, войсковая часть ЮЯ, полевая почта</div>
+                                        <div class="value">
+                                            <input type="text" name="russianpochta[num-address-type-to]" value="{$russianpochta_order['num-address-type-to']|default:''|escape}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clear-both"></div>
+
+
+
+                            <h3 class="grey">
+                                Отправление
+                                <a class="collapse-btn" href="#mail-fields"><i class="icon16 darr overhanging"></i></a>
+                            </h3>
+                            <div id="mail-fields" class="field-group">
+                                <div class="field">
+                                    <div class="name">Номер заказа *</div>
+                                    <div class="value">
+                                        <input type="hidden" name="russianpochta[order-num]" value="{$russianpochta_order['order-num']|default:$order['id']|escape}"/>
+                                        <input class="required" type="text" name="russianpochta[order-num]" value="{$russianpochta_order['order-num']|default:$order['id']|escape}" disabled="disabled"/>
+                                        <p class="hint">Внешний идентификатор заказа, который формируется отправителем</p>
+                                    </div>
+                                </div> 
+
+
+                                <div class="field">
+                                    <div class="name">Установлена ли отметка «Осторожно/Хрупкое»?</div>
+                                    <div class="value">
+                                        <input type="hidden" name="russianpochta[fragile]" value="0"/>
+                                        <input type="checkbox" name="russianpochta[fragile]" value="1"{if $russianpochta_order.fragile|default:0} checked="checked"{/if}/>
+                                    </div>
+                                </div> 
+
+                                <div class="field">
+                                    <div class="name">Категория РПО *</div>
+                                    <div class="value">
+                                        <select name="russianpochta[mail-category]">
+                                            <option value="WITH_DECLARED_VALUE"{if $russianpochta_order['mail-category']|default:'WITH_DECLARED_VALUE' == 'WITH_DECLARED_VALUE'} selected="selected"{/if}>С объявленной ценностью</option>
+                                            <option value="ORDINARY"{if $russianpochta_order['mail-category']|default:'WITH_DECLARED_VALUE' == 'ORDINARY'} selected="selected"{/if}>Обыкновенное</option>
+                                            <option value="WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY"{if $russianpochta_order['mail-category']|default:'WITH_DECLARED_VALUE' == 'WITH_DECLARED_VALUE_AND_CASH_ON_DELIVERY'} selected="selected"{/if}>С объявленной ценностью и наложенным платежом</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="name">Сумма объявленной ценности</div>
+                                    <div class="value">
+                                        {if !empty($russianpochta_order)}
+                                            {$insr_value = $russianpochta_order['insr-value'] / 100.0}
+                                        {else}
+                                            {$insr_value = number_format(shop_currency($order.total, $order.currency,'RUB', false), 2, ',', '')}
+                                        {/if}
+                                        <input name="russianpochta[insr-value]" value="{$insr_value|escape}"/> {$currency.sign_html}
+                                    </div>
+                                </div>   
+                                <div class="field">
+                                    <div class="name">Сумма наложенного платежа</div>
+                                    <div class="value">
+                                        <input name="russianpochta[payment]" value="{$russianpochta_order['payment']|default:'0'|escape}"/> {$currency.sign_html}
+                                    </div>
+                                </div> 
+
+                                <div class="field">
+                                    <div class="name">Вид РПО *</div>
+                                    <div class="value">
+                                        <select name="russianpochta[mail-type]">
+                                            <option value="POSTAL_PARCEL"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCELL' == 'POSTAL_PARCEL'} selected="selected"{/if}>Посылка "нестандартная"</option>
+                                            <option value="ONLINE_PARCEL"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'ONLINE_PARCEL'} selected="selected"{/if}>Посылка "онлайн"</option>
+                                            <option value="ONLINE_COURIER"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'ONLINE_COURIER'} selected="selected"{/if}>Курьер "онлайн"</option>
+                                            <option value="EMS"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'EMS'} selected="selected"{/if}>Отправление EMS</option>
+                                            <option value="EMS_OPTIMAL"{if $russianpochta_order['mail-type']|default:'POSTAL_PARCEL' == 'EMS_OPTIMAL'} selected="selected"{/if}>EMS оптимальное</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Вес РПО *</div>
+                                    <div class="value">
+                                        <input class="required" type="number" min="1" name="russianpochta[mass]" value="{$russianpochta_order['mass']|default:'1000'|escape}"/>
+                                        <p class="hint">Вес в граммах</p>
+                                    </div>
+                                </div>   
+
+                                <div class="field">
+                                    <div class="name">Размеры</div>
+                                    <div class="value">
+                                        <input class="short" type="number" min="0" name="russianpochta[dimension][height]" value="{$russianpochta_order.dimension.height|default:'0'|escape}" placeholder="0"/>
+                                        x
+                                        <input class="short" type="number" min="0" name="russianpochta[dimension][length]" value="{$russianpochta_order.dimension.length|default:'0'|escape}" placeholder="0"/>
+                                        x
+                                        <input class="short" type="number" min="0" name="russianpochta[dimension][width]" value="{$russianpochta_order.dimension.width|default:'0'|escape}" placeholder="0"/>
+                                        <p class="hint">Высота, длина, ширина в сантиметрах</p>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Установлен флаг «за доставку платит» клиент</div>
+                                    <div class="value">
+                                        <input type="hidden" name="russianpochta[rcp-pays-shipping]" value="0"/>
+                                        <input type="checkbox" name="russianpochta[rcp-pays-shipping]" value="1"{if $russianpochta_order['rcp-pays-shipping']|default:0} checked="checked"{/if}/>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <div class="name">Признак услуги SMS уведомления</div>
+                                    <div class="value">
+                                        <input type="hidden" name="russianpochta[sms-notice-recipient]" value="0"/>
+                                        <input type="checkbox" name="russianpochta[sms-notice-recipient]" value="1"{if $russianpochta_order['rcp-pays-shipping']|default:0} checked="checked"{/if}/>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+                                <div class="name">Комментарий</div>
+                                <div class="value">
+                                    <textarea name="russianpochta[comment]">{$russianpochta_order.comment|default:''|escape}</textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                    {/if}
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <div class="dialog-buttons-gradient">
+                    {if !empty($russianpochta_order.id)}
+                        <input id="delete-order-btn" type="button" value="Удалить" class="button red">
+                    {/if}
+                    {if !$batch && empty($error_msg)}
+                        <input type="submit" value="Сохранить" class="button green">
+                    {/if}
+                    <a class="cancel" href="#">Отмена</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="{$wa_app_static_url}plugins/russianpochta/js/form-validator/jquery.form-validator.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var config = {
+            scrollToTopOnError: false,
+            validate: {
+                'russianpochta[insr-value]': {
+                    validation: 'number',
+                    allowing: 'float',
+                    'decimal-separator': ',',
+                    'error-msg': 'Пожалуйста, введите стоимость в рублях, копейки указываются через запятую'
+                },
+                'russianpochta[payment]': {
+                    validation: 'number',
+                    allowing: 'float',
+                    'decimal-separator': ',',
+                    'error-msg': 'Пожалуйста, введите стоимость в рублях, копейки указываются через запятую'
+                },
+                'russianpochta[tel-address]': {
+                    validation: 'number,length',
+                    length: '11',
+                    'error-msg': 'Пожалуйста, укажите только 11 цифр телефонного номера. Например, 79999999999'
+                },
+                'russianpochta[index-to]': {
+                    validation: 'number'
+                },
+                '.required': {
+                    validation: 'required'
+                }
+            }
+        };
+        $.validate({
+            lang: 'ru',
+            form: '#russianpochta-form',
+            modules: 'jsconf',
+            onModulesLoaded: function () {
+                $.setupValidation(config);
+            }
+        });
+
+        var batch = {(int)$batch};
+        if (batch) {
+            $('#russianpochta-form .dialog-content').find('select,input').attr('disabled', true);
+        }
+        $('#extended-address-fields-btn').click(function () {
+            $('#extended-address-fields').slideToggle();
+            return false;
+        });
+        $('.collapse-btn').click(function () {
+            $($(this).attr('href')).slideToggle();
+            $(this).find('i').toggleClass('rarr').toggleClass('darr');
+            return false;
+        });
+
+        $('#russianpochta-form').submit(function () {
+            if (!$(this).isValid('ru', config, false)) {
+                alert('Пожалуйста, проверьте корректность заполнения формы');
+                return false;
+            }
+            var form = $(this);
+            var loading = $('<i class="icon16 loading"></i>');
+            form.find('input[type=submit]').after(loading);
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                dataType: 'json',
+                data: form.serialize(),
+                success: function (data, textStatus) {
+                    loading.remove();
+                    if (data.status == 'ok') {
+                        form.closest('.dialog').trigger('close');
+                    } else {
+                        alert(data.errors.join(', '));
+                    }
+                }, error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                }
+            });
+            return false;
+        });
+
+        $('#delete-order-btn').click(function () {
+            var form = $('#russianpochta-form');
+            var loading = $('<i class="icon16 loading"></i>');
+            form.find('input[type=submit]').after(loading);
+            $.ajax({
+                url: '?plugin=russianpochta&module=order&action=delete',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    order_id: $('[name="russianpochta[id]"]').val()
+                },
+                success: function (data, textStatus) {
+                    loading.remove();
+                    if (data.status == 'ok') {
+                        form.closest('.dialog').trigger('close');
+                    } else {
+                        alert(data.errors.join(', '));
+                    }
+                }, error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                }
+            });
+            return false;
+        });
+        $('#russianpochta-form .cancel').click(function () {
+            $(this).closest('.dialog').trigger('close');
+            return false;
+        });
+    });
+</script>
